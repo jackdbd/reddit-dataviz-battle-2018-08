@@ -2,47 +2,42 @@ import os
 import time
 import numpy as np
 import pandas as pd
+import sqlalchemy as sa
+
+def clean_df(df):
+    df.replace(to_replace='-', value=np.nan, inplace=True)
+    return df
 
 
 def main():
-    # file_path = os.path.abspath(os.path.join('data', 'claims-2014.xls'))
-    file_path = os.path.abspath(os.path.join('data', 'tsa_2016.xlsx'))
+    engine = sa.create_engine('sqlite:///tsa.db')
+    # file_path = os.path.abspath(os.path.join('data', 'claims-2002-2006_0.xls'))
+    # file_path = os.path.abspath(os.path.join('data', 'claims-2007-2009_0.xls'))
+    # file_path = os.path.abspath(os.path.join('data', 'claims-2010-2013_0.xls'))
+    file_path = os.path.abspath(os.path.join('data', 'claims-2014.xls'))
+    # file_path = os.path.abspath(os.path.join('data', 'claims-data-2015-as-of-feb-9-2016.xlsx'))
     xl = pd.ExcelFile(file_path)
+    print(f'{file_path}')
     sheets = xl.sheet_names
+    print('Excel worksheets', sheets)
     assert len(sheets) == 1
     t0 = time.time()
     # df = pd.read_excel(file_path, sheetname=sheets[0], nrows=100)
     df = pd.read_excel(file_path, sheetname=sheets[0])
-    print('COLUMNS', df.columns)
-    # ii0 = df[(df['Claim Number'].isnull()) & (df['Airport Name'].notnull())].index.values
-
-    # ii = df[df['Claim Number'].notnull()].index.values
-    rows = []
-    for i, r in df.iterrows():
-        r_pre = df.iloc[i-1]
-        if pd.isnull(r_pre['Claim Number']):
-            if pd.notnull(r_pre['Airport Name']):
-                airport_name = f"{r_pre['Airport Name']} {r['Airport Name']}"
-                # print(airport_name)
-                r['Airport Name'] = airport_name
-            else:
-                continue
-        rows.append(r)
-
-    df = pd.DataFrame(rows, columns=df.columns)
+    # df.to_sql('tsa_claims', engine, if_exists='append')
     # df = df.drop(df.columns[11], axis=1)
     # df = df.drop('Unnamed: 11', axis=1)
+    df = clean_df(df)
     print(df.head())
     print(df.shape)
-    print(df.columns)
-    # print(df.iloc[:, 11])
-    # for i,r in df.iterrows():
-    #     print(r.values)
-    # print('0', df.loc[0].values)
-    # print('1', df.loc[1].values)
-    # print('50', df.loc[50].values)
-    # print('94', df.loc[94].values)
-    print(df.describe())
+    for col in df.columns:
+        nan_count = df[col].isnull().sum()
+        print(f"\n{col}")
+        print(f"NaN count {nan_count}")
+        print(df[col].describe())
+
+    # for i in range(10):
+    #     print(df.iloc[i].values)
     t1 = time.time()
     print(f"Done in: {(t1 - t0):.2f} seconds")
 
