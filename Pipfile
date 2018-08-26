@@ -8,6 +8,9 @@ pandas = "*"
 xlrd = "*"
 sqlalchemy = "*"
 tabula-py = "*"
+altair = "*"
+notebook = "*"
+vega = "*"
 
 [dev-packages]
 

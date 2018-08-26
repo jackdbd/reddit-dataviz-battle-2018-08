@@ -3,6 +3,8 @@ import time
 import numpy as np
 import pandas as pd
 import sqlalchemy as sa
+import altair as alt
+
 
 def clean_df(df):
     df.replace(to_replace='-', value=np.nan, inplace=True)
@@ -35,6 +37,12 @@ def main():
         print(f"\n{col}")
         print(f"NaN count {nan_count}")
         print(df[col].describe())
+
+    
+    alt.Chart(df).mark_bar().encode(
+        x=alt.X("Close Amount:Q", bin=True),
+        y='count()'
+    )
 
     # for i in range(10):
     #     print(df.iloc[i].values)
