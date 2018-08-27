@@ -1,6 +1,11 @@
 .vscode/
 .ipynb_checkpoints/
 __pycache__/
-data/
-plots/
+
+# ignore everything in data/, except the README
+/data/*
+!/data/README.md
+
 *.db
+
+plots/

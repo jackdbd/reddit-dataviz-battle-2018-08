@@ -18,19 +18,24 @@ pipenv --python python3.6
 pipenv install
 ```
 
-The entire TSA dataset is spread across multiple Excel files and PDF files.
 
-The script `make_db.py` gathers data from all the files (`.xls`, `.xlsx`, `.pdf`) and creates a SQLite database. Launch it with:
+## Data
+
+The entire TSA dataset is spread across multiple Excel files and PDF files. Download all files from [here](https://www.dhs.gov/tsa-claims-data) and put them in the `data` directory.
+
+The script `make_db.py` gathers data from all the files (`.xls`, `.xlsx`, `.pdf`) and creates a SQLite database.
 
 ```sh
-pipenv run make_db.py
+cd src
+pipenv run python make_db.py
 ```
 
 
 ## Usage
 
-Whan your database `tsa.db` is ready, you can launch a Jupyter notebook and start exploring the data:
+Whan your database `TSA.db` is ready, you can launch a Jupyter notebook and start exploring the data:
 
 ```sh
+cd notebooks
 pipenv run jupyter notebook
 ```
