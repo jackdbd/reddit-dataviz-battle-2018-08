@@ -1,3 +1,4 @@
+"""Gather data from all sources and store it in a SQLite database."""
 import os
 import time
 import datetime
@@ -8,8 +9,8 @@ import sqlalchemy as sa
 
 EXCEL_FILES = [
     # 'claims-2002-2006_0.xls',
-    'claims-2007-2009_0.xls',
-    'claims-2010-2013_0.xls',
+    # 'claims-2007-2009_0.xls',
+    # 'claims-2010-2013_0.xls',
     'claims-2014.xls',
     'claims-data-2015-as-of-feb-9-2016.xlsx'
 ]
@@ -93,4 +94,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
