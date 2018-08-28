@@ -27,7 +27,7 @@ The script `make_db.py` gathers data from all the files (`.xls`, `.xlsx`, `.pdf`
 
 ```sh
 cd src
-pipenv run python make_db.py
+pipenv run python make_db.py  # it takes ~20 minutes
 ```
 
 If you want to specify different parameters to read the PDF/Excel files, run:

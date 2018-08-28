@@ -46,6 +46,7 @@ import time
 import logging
 import argparse
 import tabula
+import numpy as np
 import pandas as pd
 import sqlalchemy as sa
 from PyPDF2 import PdfFileReader
@@ -99,7 +100,12 @@ def parse_args():
 
 def format_close_amount(series):
     if not isinstance(series['Close Amount'], float):
-        series['Close Amount'] = series['Close Amount'].replace('$', '')
+        orig = series['Close Amount']
+        string = orig.replace('$', '').replace('-', '')
+        if string:
+            series['Close Amount'] = np.float(string)
+        else:
+            series['Close Amount'] = np.nan
     return series
 
 
