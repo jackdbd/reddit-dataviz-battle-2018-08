@@ -7,7 +7,7 @@ Usage:
     Run command with different arguments
       - read 3000 rows at a time from any excel file,
       - read 20 pages at a time from any PDF file,
-      - drop db first,
+      - debug mode (drop db, read only a few rows in Excel/PDF files)
       - verbose output
     $ python make_db.py -x 3000 -p 20 -d -v
 """
@@ -64,12 +64,24 @@ def parse_args():
         help=PAGE_ARGUMENT['help'],
     )
     parser.add_argument(
-        "-d", "--drop_db",
+        "-d", "--debug",
         action="store_true",
-        help="If set, drop the database"
+        help="""
+        If set, drop the database and fetch a small amount of records from each 
+        excel file and each PDF file
+        """
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="If set, increase output verbosity"
+        "--no_excel", action="store_true",
+        help="If set, don't process Excel files"
+    )
+    parser.add_argument(
+        "--no_pdf", action="store_true",
+        help="If set, don't process PDF files"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true",
+        help="If set, increase output verbosity"
     )
     return parser.parse_args()
 
@@ -83,40 +95,44 @@ def main():
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    if args.drop_db:
+    if args.debug:
         try:
             os.unlink(DB_PATH)
         except FileNotFoundError:
             pass
 
     t0 = time.time()
-
-    dataframes_excel = [
-        make_df_from_excel(file_name, nrows=args.xls_chunksize) 
-        for file_name in EXCEL_FILES]
-    
-    dataframes_pdf = [
-        make_df_from_pdf(file_name, page_step=args.page_step) 
-        for file_name in PDF_FILES]
-
     dataframes = []
-    dataframes.extend(dataframes_excel)
-    dataframes.extend(dataframes_pdf)
+    
+    if not args.no_excel:
+        dataframes_excel = [
+            make_df_from_excel(file_name, args.xls_chunksize, args.debug) 
+            for file_name in EXCEL_FILES]
+        dataframes.extend(dataframes_excel)
+
+    if not args.no_pdf:
+        dataframes_pdf = [
+            make_df_from_pdf(file_name, args.page_step, args.debug) 
+            for file_name in PDF_FILES]
+        dataframes.extend(dataframes_pdf)
 
     for i, df in enumerate(dataframes):
         logger.debug(f"{i} DataFrame: {df.shape}")
         logger.debug(df.columns)
 
-    logger.debug(f"Concatenate {len(dataframes)} dataframes into 1")
-    df = pd.concat(dataframes).reset_index().drop(columns=['index'])
-    logger.debug(df.shape)
+    if dataframes:
+        logger.debug(f"Concatenate {len(dataframes)} dataframes into 1")
+        df = pd.concat(dataframes).reset_index().drop(columns=['index'])
+        logger.debug(df.shape)
 
-    # TODO: cast dates before writing to the DB?
-    # df['incident_date'] = df['incident_date'].astype('str')
-    # df['date_received'] = df['date_received'].astype('str')
-    
-    engine = sa.create_engine(f"sqlite:///{DB_PATH}")
-    df.to_sql(TABLE_NAME, con=engine, if_exists='append', index=False, chunksize=10000)
+        # TODO: cast dates before writing to the DB?
+        # df['incident_date'] = df['incident_date'].astype('str')
+        # df['date_received'] = df['date_received'].astype('str')
+        
+        engine = sa.create_engine(f"sqlite:///{DB_PATH}")
+        df.to_sql(
+            TABLE_NAME, con=engine, if_exists='append', index=False, 
+            chunksize=10000)
 
     t1 = time.time()
     logger.info(f"Done in: {(t1 - t0):.2f} seconds")

@@ -166,7 +166,7 @@ def pdf_to_rows_columns(file_path, pages_string):
     return rows, df.columns
 
 
-def make_df_from_pdf(file_name, page_step):
+def make_df_from_pdf(file_name, page_step, debug=False):
     """Read from a PDF file in chunks and make a single DataFrame.
 
     In PDF file containing all TSA data from 2017 the header appears only on the
@@ -175,7 +175,17 @@ def make_df_from_pdf(file_name, page_step):
     A workaround is to always read the first page, and to remove all duplicate
     records later.
     Unfortunately, sometimes pandas fails to tokenize the page for other issues.
+
+    Parameters
+    ----------
+    file_name : str
+    page_step : int
+        Number of pages to read at a time. These PDF files are too big, so we
+        can't read all pages in one go.
+    debug : bool
+        It's handy to parse only 2-3 pages when debugging
     """
+    t0 = time.time()
     file_path = os.path.abspath(os.path.join(DATA_DIR, file_name))
     num_pages = None
     with open(file_path, 'rb') as stream:
@@ -184,7 +194,8 @@ def make_df_from_pdf(file_name, page_step):
     
     logger.info(f"{file_name} has {num_pages} pages")
 
-    # num_pages = 2  # it's handy to parse only 2-3 pages when debugging
+    if debug:
+        num_pages = 2
 
     rows_all = []
     for i in range(0, num_pages, page_step):
@@ -212,6 +223,8 @@ def make_df_from_pdf(file_name, page_step):
     df0 = harmonize_columns(df_raw)
     df1 = sanitize_dates(df0)
     df = assign_nan(df1)
+    t1 = time.time()
+    logger.info(f"{file_name} processed in: {(t1 - t0):.2f} seconds")
     return df
 
 

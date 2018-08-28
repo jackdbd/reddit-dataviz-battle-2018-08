@@ -17,7 +17,13 @@ ch.setLevel(logging.DEBUG)
 ch.setFormatter(formatter)
 
 
-def harmonize_columns(df_in, drop_columns=False):
+def harmonize_columns(df_in, drop_columns=True):
+    """Harmonize column names across all datasets, drop columns if specified.
+
+    Some columns (e.g. Claim Amount, Status) are available only in some files.
+    'Close Amount' and 'Claim Amount' are NOT the same thing.
+    'Status' is very similar to 'Disposition'.
+    """
     columns = {
         'Airline Name': 'airline_name',
         'Airport Code': 'airport_code', 
@@ -39,7 +45,7 @@ def harmonize_columns(df_in, drop_columns=False):
 
     if drop_columns:
         cols_available = set(df_out.columns.values)
-        cols_to_drop = set(['claim_number', 'claim_amount', 'status'])    
+        cols_to_drop = set(['claim_amount', 'status'])
         cols_available_to_drop = list(cols_available.intersection(cols_to_drop))
         df_out.drop(columns=cols_available_to_drop, inplace=True)
 

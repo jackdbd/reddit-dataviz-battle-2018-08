@@ -76,8 +76,19 @@ def date_parser(x):
     return dt
 
 
-def make_df_from_excel(file_name, nrows):
-    """Read from an Excel file in chunks and make a single DataFrame."""
+def make_df_from_excel(file_name, nrows, debug=False):
+    """Read from an Excel file in chunks and make a single DataFrame.
+
+    Parameters
+    ----------
+    file_name : str
+    nrows : int
+        Number of rows to read at a time. These Excel files are too big, so we
+        can't read all rows in one go.
+    debug : bool
+        It's handy to parse only a single chunk of data when debugging  
+    """
+    t0 = time.time()
     file_path = os.path.abspath(os.path.join(DATA_DIR, file_name))
     xl = pd.ExcelFile(file_path)
     sheetname = xl.sheet_names[0]
@@ -98,6 +109,8 @@ def make_df_from_excel(file_name, nrows):
         else:
             logger.debug(f"  - chunk {i_chunk} ({df_chunk.shape[0]} rows)")
             chunks.append(df_chunk)
+            if debug:
+                break
         i_chunk += 1
     
     df_chunks = pd.concat(chunks)
@@ -108,6 +121,8 @@ def make_df_from_excel(file_name, nrows):
     df0 = harmonize_columns(df_raw)
     df1 = sanitize_dates(df0)
     df = assign_nan(df1)
+    t1 = time.time()
+    logger.info(f"{file_name} processed in: {(t1 - t0):.2f} seconds")
     return df
 
 
