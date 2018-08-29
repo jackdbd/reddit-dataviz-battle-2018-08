@@ -8,4 +8,6 @@ __pycache__/
 
 *.db
 
-plots/
+/plots/*
+!/plots/drawing.svg
+!/plots/drawing.png

@@ -4,6 +4,8 @@ Code for the Reddit dataisbeautiful [DataViz Battle for the Month of August 2018
 
 Analysis and visual exploration of [TSA Claims Data](https://www.dhs.gov/tsa-claims-data).
 
+![Some plots made with Altair](https://raw.githubusercontent.com/jackdbd/reddit-dataviz-battle-2018-08/master/plots/drawing.png "Some plots made with Altair.")
+
 
 ## Installation
 
